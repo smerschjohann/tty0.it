@@ -16,7 +16,7 @@ title = "Cloud, Security & Networking"
  [author]
    name = "Simon Merschjohann"
    image = "img/avatar.jpg"
-   headline = "DevSecOps"
+   headline = ""
    bio = "DevSecOps & Senior Cloud Consultant"
    links = [
      { email = "mailto:smerschjo@gmail.com" },
