@@ -54,7 +54,9 @@ dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /nores
 wsl --set-default-version 2
 ````
 
-6. Install a Distribution. For a custom solution with the possibility to share your home directory, have a look at my other post: {{< article link="/posts/wsl-shared-home/" >}} 
+6. Install a Distribution. For a custom solution with the possibility to share your home directory, have a look at my other post:
+
+{{< article link="/posts/windev/wsl-custom-distro/" >}}
 
    Alternatively, you can install Ubuntu 20.04 LTS either by the Microsoft Store
    or by [manual download](https://docs.microsoft.com/de-de/windows/wsl/install-manual).
