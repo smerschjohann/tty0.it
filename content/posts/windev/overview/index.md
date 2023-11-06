@@ -1,5 +1,6 @@
 ---
 title: "WSL: Development on Windows"
+summary: "Using the WSL as daily driver."
 date: 2023-10-01
 weight: 1
 chapter: false
