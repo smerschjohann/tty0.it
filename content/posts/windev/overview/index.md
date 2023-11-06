@@ -9,21 +9,19 @@ series_order: 1
 
 ## Overview
 
-In this section I want to show you my current development environment.
-While not limited to the terminal, I want to focus on the dev stuff using the terminal. I will add IntelliJ and other interesting aspects that I use for development.
+In this series I want to show you my current Linux development environment on Windows.
+While I use this environment for nearly everything, I will focus on the Terminal here. In later articles, I will describe how to use IntelliJ and other features that interoperate with Windows.
 
-I'm using the ZSH shell with some plugins and additional tools to allow easier interaction with clusters and always know to which cluster I'm connected.
+As Shell of choice, I use ZSH with some plugins and additional tools, as it enables autocompletion, nice history searches, good shell visualizations and many more.
 
 As my work environments are mainly Windows systems, I had to come up with solution that allows me to use this shell on Windows.
-Thanks to Microsofts latest invest in that area, it is now possible to have a fully blown Linux environment with nearly no limitations regarding the terminal.
 
+Thanks to Microsofts latest invest in that area, it is now possible to have a fully blown Linux environment with nearly no limitations regarding the Terminal.
 
 ![Windows Terminal](windows-terminal.png "Windows Terminal showing the ZSH shell")
 
-
 As shown above, the _Windows Terminal_ allows to have multiple tabs, it also allows to split the pane which is a very nice feature. 
 Using that you don't need additional tools like _tmux_ or others.
-
 
 ![](windows-terminal-2.png "Windows Terminal pane mode")
 
@@ -72,10 +70,10 @@ If you have network issues in your WSL2, please have a look at [WSL2 Firewall is
 
 ## Windows Terminal
 I recommend the use of the Windows Terminal in combination with the WSL, as it has full font support,
-has tabs and pane support, is hugely customizable, and simple looks great.
+has tabs and pane support, is hugely customizable and looks great.
 
 You can install the Windows Terminal either using the Microsoft Store or by downloading the latest installer from 
-the [Github page](https://github.com/microsoft/terminal/releases/).
+the [Github page](https://github.com/microsoft/terminal/releases/). On Windows 11 it comes preinstalled.
 
 After installation, you have already a working terminal, to further improve it you can customize it.
 
