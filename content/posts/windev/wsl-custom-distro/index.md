@@ -1,8 +1,7 @@
 ---
 title: "WSL: Custom Distributions"
 summary: "WSL distributions from Containers, Docker in WSL, etc."
-date: 2023-11-06
-draft: false
+date: 2023-11-05
 series: ["Windows development"]
 series_order: 3
 ---
