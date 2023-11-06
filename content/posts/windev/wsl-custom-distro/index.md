@@ -15,7 +15,7 @@ In this blog post, I want to show you how to build your own WSL (Windows Subsyst
 4. Compatibility with WSLg (compatible with IntelliJ in WSL).
 5. Shared /home. All my distributions share the same /home directory. This makes it easy to switch distributions, try things out, or update from one Fedora version to the next.
 
-The download and installation guide can be found at my [Github repository](https://github.com/smerschjohann/wslbox). You can also find a installation description there. There is a ready to use Distribution for _Ubuntu_ and _Fedora_.
+Ready made Distributions for _Fedora_ and _Ubuntu_ can be found at my [Github repository](https://github.com/smerschjohann/wslbox), including a concise installation guide.
 
 {{< github repo="smerschjohann/wslbox" >}}
 
@@ -114,7 +114,7 @@ systemd=true
 ```
 
 ### Home mount script
-As I want to experiment with different Distributions and also allow to update my Distribution without loosing my data in my /home directory, I came up with the a systemd unit file, that mounts the /home directory externally.
+As I want to experiment with different Distributions and also allow to update my Distribution without loosing my data in /home directory, I came up with the a systemd unit file, that mounts the /home directory externally.
 
 To do this, it uses the fact, that all WSL distributions run on the same VM. Microsoft allows to share directories in the `/mnt/wsl` directory. We use this fact in the following way:
 
