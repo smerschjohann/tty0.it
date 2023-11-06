@@ -1,54 +1,55 @@
 ---
 title: "WSL: Custom Distributions"
 summary: "WSL distributions from Containers, Docker in WSL, etc."
-date: 2023-10-11
+date: 2023-11-06
 draft: false
 series: ["Windows development"]
 series_order: 3
 ---
 
-This blog post is for all of us still dependend on Windows for our day to day job.
+In this blog post, I want to show you how to build your own WSL (Windows Subsystem for Linux) distribution. If instead you prefer to use a ready-made one, I've got you covered as well. It includes:
 
-In this post, I want to show you, how you can create a WSL distribution, allow to share the home directory between multiple distributions and enable moby/docker in the WSL.
+1. Setting up a user after installation.
+2. ZSH shell with the powerlevel9k theme.
+3. Container tools like docker, buildah, podman, and k3s as a Kubernetes distribution.
+4. Compatibility with WSLg (compatible with IntelliJ in WSL).
+5. Shared /home. All my distributions share the same /home directory. This makes it easy to switch distributions, try things out, or update from one Fedora version to the next.
 
-As I like to use Fedora, I present all examples using Fedora, but Debian, Ubuntu or any other major distribution should work as well.
-
-
-## Create a distribution
-
-On the Windows Store there are already a few distributions ready to go. But what if they don't fit what you want or you want to provide your colleaques with a variant with preinstalled packages?
-
-You can create your own Distribution!
-
-The `wsl.exe` command allows you to import a tarball with e.g. `wsl --import Fedora c:\wsl\Fedora .\fedora.tar` as a new distribution. The mentioned command will import the _fedora.tar_ which must contain a whole root directory structure like /bin, /usr/bin etc. into a new vhdx drive which it will put into **c:\wsl\fedora**. The new distro is then accessable by the name **Fedora**. Microsoft describes this process on a [dedicated page](https://learn.microsoft.com/en-us/windows/wsl/use-custom-distro).
-
-We can use this fact, to create our own distro, that comes with preinstalled tools, additional features etc. I did exactly that with a custom distro with:
-
-1. Docker / K3s preinstalled
-2. ZSH with customization already applied
-3. Development environment like IntelliJ (using WSLg) and Code.
-4. Custom Systemd Unit to allow sharing the /home directory between WSL distributions.
-
-So if you don't want to create your own distro, but use that one, feel free to use it. An installation description can be found in the _README.md_.
+The download and installation guide can be found at my [Github repository](https://github.com/smerschjohann/wslbox). You can also find a installation description there. There is a ready to use Distribution for _Ubuntu_ and _Fedora_.
 
 {{< github repo="smerschjohann/wslbox" >}}
 
-### How to create?
+## Create a distribution
+
+On the _Windows Store_ there are already a few distributions to install from. So why even bother tampering with that? 
+
+Well, there are some reasons:
+
+1. Those distributions don't come with Systemd preconfigured. If you want to use that, you have to enable that manually. Using Systemd comes with some benefits, it allows you to directly use daemons and services that depend on it. It is for example very easy to install Docker or even a Kubernetes Distribution (k3s), if you have working Systemd.
+2. The typical WSL installation is a one time action, that can take quite some time. Especially, if all your colleaques have to do it. Why not prepare a distribution once and allow everyone to benefit from it?
+3. Reproducability. With the described approach, you can just delete and reinstall a distribution many times without loosing any data (if all your data is stored in /home). This allows you to use WSL as you might already use containers.
+
+### Background
+
+The `wsl.exe` command allows you to import a tarball with e.g. `wsl --import Fedora c:\wsl\Fedora .\fedora.tar` as a new distribution. The mentioned command will import the _fedora.tar_ which must contain a whole root directory structure like /bin, /usr/bin etc. into a new vhdx disk which it will put into **c:\wsl\fedora**.
+The new distro is then accessable by the name **Fedora** and can be started by `wsl.exe -d Fedora`. Microsoft describes this process in their [documentation](https://learn.microsoft.com/en-us/windows/wsl/use-custom-distro).
+
+We can use this fact, to create our own distro, that comes with preinstalled tools, additional features etc.
+
+### How to spin your own Distribution
 
 As the `wsl.exe --import` command accepts any valid tarball with a root filesystem, it is quite easy to create such a tar with many tools. You could do it by:
 
 1. tar'ing an actual linux system. E.g. a running VM you have somewhere around.
-2. using tools like `debootstrap` which allow to create the directory structure for Debian.
-3. Using container tools like `docker` or `podman`.
-
-We are using `podman` for this use case as it allows in combination with `skopeo` to create a tarball from any _Dockerfile_.
+2. using tools like `debootstrap` which allows you to create the directory structure for Debian.
+3. Using container tools like `buildah`, `docker` or `podman`.
 
 
 ### Build from Dockerfile
 
 As a _Dockerfile_ allows you to use any Container image as your base, you are free to create a custom distribution using any Linux Distribution that is available as Container. That means you could use Alpine, Debian, Ubuntu, RHEL, OpenSuse and many more.
 
-I will use Fedora for all the examples, but as stated, it is not limited to Fedora. In the mentioned repository of mine, I even maintain another Distribution based on Debian.
+I will use Fedora for all the examples, but as stated, it is not limited to Fedora. In fact, the mentioned repository, contains also a Distribution based on Ubuntu.
 
 Ok enough explanation, let's see a minimal Dockerfile:
 
@@ -59,7 +60,7 @@ RUN mkdir -p /usr/lib/binfmt.d; \
     echo :WSLInterop:M::MZ::/init:PF > /usr/lib/binfmt.d/WSLInterop.conf
 ```
 
-This the bare minimum that you should have inside of the custom distribution. Why that additional file? It allows the _*.exe_ interoperability. Without it, you cannot run windows executables from inside your shell. It basically allows you to execute executables like `cmd.exe` from inside your WSL.
+This the bare minimum that you should have inside of the custom distribution. Why that additional file? It allows the _*.exe_ interoperability. Without it, you cannot run windows executables from inside your shell. It basically allows you to execute binaries like `cmd.exe` from inside your WSL.
 
 To build the Dockerfile into a tarball that can be imported by `wsl.exe`, you can use `podman`, `buildah` or `docker`. I recommend `buildah` in pipelines, as it allows building it with least privileges. Please see my upcoming post of how to allow `buildah` builds on Openshift and Kubernetes using the `overlay` storage driver.
 
@@ -99,13 +100,12 @@ docker rmi devbox:latest
 The resulting wsl-distro.tgz can now be imported as WSL distribution:
 
 ```
-gunzip wsl-distro.tar.gz
-wsl.exe --import myfirstdistro c:\wsl\firstdistro .\wsl-distro.tar 
+wsl.exe --import myfirstdistro c:\wsl\firstdistro .\wsl-distro.tar.gz
 ```
 
-## Enhance with systemd
+## Enhance with Systemd
 
-WSL2 also allows distributions to use systemd, which I highly recommend. It allows you to install docker, k3s or any other software that requires systemd. It also allows to create background services, that are always started when you start the wsl.
+WSL2 also allows distributions to use Systemd, which I highly recommend. It allows you to install `docker`, `k3s` or any other software that requires Systemd. It also allows to create background services, that are always started when you start the wsl.
 
 To activate it, you have to create the file `/etc/wsl.conf` with the following content:
 ```ini
@@ -114,16 +114,16 @@ systemd=true
 ```
 
 ### Home mount script
-As I want to experiment with different distributions and also allow to update my distribution without loosing my /home directory, I came up with the a systemd unit file, that mounts the /home directory externally.
+As I want to experiment with different Distributions and also allow to update my Distribution without loosing my data in my /home directory, I came up with the a systemd unit file, that mounts the /home directory externally.
 
 To do this, it uses the fact, that all WSL distributions run on the same VM. Microsoft allows to share directories in the `/mnt/wsl` directory. We use this fact in the following way:
 
 1. Create a wsl-data distribution, that is not actively used, but holds shared data. This distribution needs at the bash and mount commands. I base this from a `busybox` container.
 2. From the wsl-data distribution, bind mount a local /data directory to the /mnt/wsl/data directory.
-3. On each boot of our main distribution(s), check if the data is already mounted. If not, start the wsl-data distribution and mount it accordingly.
+3. On each boot of our main distribution, check if the data directory is already mounted. If not, start the wsl-data distribution and mount it accordingly.
 4. Bind mount the /mnt/wsl/data/home directory to /home.
 
-To accomplish this, the following SystemD unit file is used. It is configured, to start very early in the boot process.
+To accomplish this, the following SystemD unit file is used. It will start very early in the boot process.
 
 ```ini
 [Unit]
@@ -177,7 +177,7 @@ mount -o bind /mnt/wsl/data/home /home
 I use this as a daily driver without any issues.
 
 
-You can integrate it in a Dockerfile like this:
+You can integrate it in a Dockerfile by copying the files and enabling the service.
 
 ```Dockerfile
 FROM registry.fedoraproject.org/fedora-toolbox:38 as devbox
@@ -217,13 +217,10 @@ docker rm devdata
 
 Now you know, how to create your own distribution. If you don't want to do that, but still profit from the `mount-home.service`, you can use the WSL distribution that I share in my repository.
 
-The repository also contains all files, that I mentioned in this post. In addition to the mentioned parts, it also adds:
+The repository also contains all files, that I mentioned in this post.
 
-1. K3s (disabled by default, start with `systemctl start k3s`).
-2. Docker (can be disabled by `systemctl disable docker`)
-3. Necessary tools for WSLg and IntelliJ. Please raise an Issue or PR, if you want variants with preinstalled IntelliJ.
-4. A lot of utility tools for Kubernetes etc.
+The build is completetly automated using *Github Actions*, so you can verify the Release builds and spin your own if you like. I will update the Distribution on major changes like new OS releases or when I think a new tool would be nice to integrate.
 
-The build is completetly automated using *Github Actions*, so you can verify the Release builds. The distribution is automatically build every two weeks, so that it includes the latest updates.
+Feel free to create a PR for new distributions or additions to the existing once, if you have something interesting that you think everyone can participate from.
 
 {{< github repo="smerschjohann/wslbox" >}}
